@@ -3,7 +3,7 @@
 	This question requires you to use a stack to achieve a bracket match
 */
 
-// I AM NOT DONE
+
 #[derive(Debug)]
 struct Stack<T> {
 	size: usize,
@@ -30,10 +30,14 @@ impl<T> Stack<T> {
 		self.data.push(val);
 		self.size += 1;
 	}
-	fn pop(&mut self) -> Option<T> {
-		// TODO
-		None
-	}
+    fn pop(&mut self) -> Option<T> {
+        if self.is_empty() {
+            None
+        } else {
+            self.size -= 1;
+            self.data.pop()
+        }
+    }
 	fn peek(&self) -> Option<&T> {
 		if 0 == self.size {
 			return None;
@@ -99,10 +103,46 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 	}
 }
 
-fn bracket_match(bracket: &str) -> bool
-{
-	//TODO
-	true
+fn bracket_match(bracket: &str) -> bool {
+    let mut stack = Stack::new();
+    
+    for c in bracket.chars() {
+        match c {
+            // 遇到左括号，入栈
+            '(' | '[' | '{' => stack.push(c),
+            
+            // 遇到右括号，检查栈顶元素是否匹配
+            ')' => {
+                if let Some('(') = stack.pop() {
+                    // 匹配成功，继续检查
+                    continue;
+                } else {
+                    // 不匹配或栈为空，返回 false
+                    return false;
+                }
+            },
+            ']' => {
+                if let Some('[') = stack.pop() {
+                    continue;
+                } else {
+                    return false;
+                }
+            },
+            '}' => {
+                if let Some('{') = stack.pop() {
+                    continue;
+                } else {
+                    return false;
+                }
+            },
+            
+            // 其他字符忽略
+            _ => continue,
+        }
+    }
+    
+    // 所有字符处理完毕后，栈应为空
+    stack.is_empty()
 }
 
 #[cfg(test)]
