@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -69,15 +68,59 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+    pub fn merge(mut list_a: LinkedList<T>, mut list_b: LinkedList<T>) -> Self
+    where
+        T: Ord,
+    {
+        let mut merged_list = LinkedList::new();
+        
+        if list_a.start.is_none() {
+            return list_b;
         }
-	}
+        if list_b.start.is_none() {
+            return list_a;
+        }
+        
+        let mut a_ptr = list_a.start;
+        let mut b_ptr = list_b.start;
+        
+        while a_ptr.is_some() && b_ptr.is_some() {
+            unsafe {
+                let a_val = &(*a_ptr.unwrap().as_ptr()).val;
+                let b_val = &(*b_ptr.unwrap().as_ptr()).val;
+                
+                if a_val <= b_val {
+                    let next = (*a_ptr.unwrap().as_ptr()).next;
+                    merged_list.add(std::ptr::read(&(*a_ptr.unwrap().as_ptr()).val));
+                    a_ptr = next;
+                } else {
+                    let next = (*b_ptr.unwrap().as_ptr()).next;
+                    merged_list.add(std::ptr::read(&(*b_ptr.unwrap().as_ptr()).val));
+                    b_ptr = next;
+                }
+            }
+        }
+        
+        // Add remaining elements from list_a
+        while a_ptr.is_some() {
+            unsafe {
+                let next = (*a_ptr.unwrap().as_ptr()).next;
+                merged_list.add(std::ptr::read(&(*a_ptr.unwrap().as_ptr()).val));
+                a_ptr = next;
+            }
+        }
+        
+        // Add remaining elements from list_b
+        while b_ptr.is_some() {
+            unsafe {
+                let next = (*b_ptr.unwrap().as_ptr()).next;
+                merged_list.add(std::ptr::read(&(*b_ptr.unwrap().as_ptr()).val));
+                b_ptr = next;
+            }
+        }
+        
+        merged_list
+    }
 }
 
 impl<T> Display for LinkedList<T>
